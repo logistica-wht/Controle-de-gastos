@@ -59,3 +59,13 @@ test('dicas locais', () => {
   assert.match(t, /Alimentação/); assert.match(t, /Assinaturas/); assert.match(t, /Parcelamentos/);
   assert.match(L.localTips([], [], [], [], ''), /Ainda não há despesas/);
 });
+
+test('modelo CSV e backup são reimportáveis', () => {
+  const tpl = '\uFEFFData;Descrição;Valor;Tipo;Categoria;Parcela\r\n05/11/2026;Supermercado Exemplo;152,40;Despesa;Alimentação;\r\n06/11/2026;Loja Exemplo;199,90;Despesa;Compras;2/5\r\n10/11/2026;Salário;5000,00;Receita;Renda;\r\n11/11/2026;"Pix, família";50,00;Transferência;Outros;\r\n';
+  const rows = L.parseCSVText(tpl).map((r) => L.normalizeRecord(r));
+  assert.equal(rows.length, 4);
+  assert.equal(rows[0].category, 'Alimentação'); assert.equal(rows[0].kind, 'expense');
+  assert.deepEqual(rows[1].installment, { current: 2, total: 5 });
+  assert.equal(rows[2].kind, 'income');
+  assert.equal(rows[3].kind, 'transfer'); assert.equal(rows[3].description, 'Pix, família');
+});

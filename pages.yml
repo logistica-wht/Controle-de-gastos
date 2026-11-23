@@ -24,8 +24,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Testes das funções de leitura
         run: node --test tests/*.test.js
-      - name: Montar pasta pública (somente index.html)
-        run: mkdir public && cp index.html public/
+      - name: Montar pasta pública (app instalável)
+        run: mkdir public && cp -r index.html manifest.webmanifest sw.js icons public/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
