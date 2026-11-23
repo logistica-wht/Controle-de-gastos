@@ -1,0 +1,19 @@
+{
+  "name": "FINANCE AI – Gestão financeira familiar",
+  "short_name": "FINANCE AI",
+  "description": "Controle de gastos, parcelas e metas da família, com importação de extratos e dicas inteligentes.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#07182b",
+  "theme_color": "#07182b",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

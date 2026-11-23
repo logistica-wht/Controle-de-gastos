@@ -21,7 +21,7 @@ A URL e a chave **publishable** do projeto já estão no começo do script do `i
 - Limites: a chave publishable fica visível no HTML (normal); quem a tem consegue chamar as funções, mas só com e-mail/senha válidos. Use senhas fortes e HTTPS.
 
 ## 3. Instalar como aplicativo (PWA)
-Arquivos do app: `index.html`, `manifest.webmanifest`, `sw.js` e a pasta `icons/` (mantenha todos juntos, na mesma pasta).
+Arquivos do app (todos na MESMA pasta, sem subpastas): `index.html`, `manifest.webmanifest`, `sw.js`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`.
 1. Publique no GitHub Pages (item abaixo). A instalação exige **https**; abrindo o arquivo local não aparece a opção.
 2. Android (Chrome): abra o endereço do site e toque em **Instalar app** (botão no menu lateral/login) ou menu ⋮ › Instalar app. iPhone (Safari): Compartilhar › Adicionar à Tela de Início.
 3. O service worker guarda só a "casca" do app (tela e ícones) para abrir mais rápido/offline. **Dados financeiros nunca são guardados em cache.** Ao atualizar o site, aumente `CACHE = 'finance-ai-vN'` em `sw.js`.
@@ -32,7 +32,7 @@ Arquivos do app: `index.html`, `manifest.webmanifest`, `sw.js` e a pasta `icons/
 - Bibliotecas (leitor de PDF, planilha, login Microsoft) são carregadas da internet **só quando usadas**.
 
 ## 5. IA (opcional)
-Aba *Assistente IA*: informe sua chave Anthropic ou OpenAI. Ela fica **só neste navegador** (localStorage) e os dados vão direto ao provedor; use uma chave com limite de gasto. Sem chave, as dicas são calculadas localmente.
+Aba *Assistente IA*: escolha o provedor — Anthropic (Claude), OpenAI ou **Meta (Muse)** — e informe sua chave. Meta: chave criada no painel dev.meta.ai (Model API), endereço `https://api.meta.ai/v1`, modelo padrão `muse-spark-1.1`; se o navegador bloquear a chamada direta (CORS), use outro provedor ou as dicas locais. Ela fica **só neste navegador** (localStorage) e os dados vão direto ao provedor; use uma chave com limite de gasto. Sem chave, as dicas são calculadas localmente.
 
 ## 6. OneDrive
 Registre um app no Microsoft Entra (tipo *Single-page application*), redirect URI = URL exata do site (a aba Importações mostra), permissões `User.Read` e `Files.Read`. Cole na aba Importações o **ID do aplicativo (cliente)** — um código `00000000-0000-…`, **não o e-mail**. Em conta de empresa o TI pode exigir aprovação; alternativa: importação manual escolhendo os arquivos pelo app OneDrive. Só funciona em https/localhost e com a página aberta (sem sincronização em segundo plano).
@@ -42,3 +42,9 @@ Botões **Modelo CSV** (planilha de exemplo para preencher) e **Meus lançamento
 
 ## Testes
 `npm test` (funções de leitura/normalização; `app_pure.js` é o mesmo bloco embutido no `index.html`).
+
+## Atualização do banco (se você já aplicou o SQL antes)
+Rode uma vez `atualizacao-sql-tipo.sql` no SQL Editor: habilita corrigir na tela o *Tipo* (receita/despesa/transferência) de cada lançamento.
+
+## Extratos bancários em PDF
+O leitor reconhece extratos em colunas (Data | Histórico | Docto | Crédito | Débito | Saldo): a data vale para as linhas seguintes até a próxima data, o histórico pode ocupar 2 linhas, e receita/despesa vem da coluna (Crédito/Débito) confirmada pela variação do saldo. Movimentos entre contas do titular (ex.: `TRANSF.POUP`, Pix para si mesmo — informe seu nome no campo *Seu nome no extrato*) viram *transferência*. Se algo vier errado, corrija o tipo/categoria na aba Lançamentos.
