@@ -1,6 +1,6 @@
 # FINANCE AI (HTML único + Supabase só como banco)
 
-Todo o sistema — layout, login, cadastro e troca de senha, lançamentos, parcelamentos, metas, importação CSV/PDF/OneDrive, planilha `.xlsx` e dicas — está no arquivo **`index.html`**.
+Aplicativo instalável (PWA). Todo o sistema — layout, login, cadastro e troca de senha, lançamentos, parcelamentos, metas, importação CSV/PDF/OneDrive, planilha `.xlsx` e dicas — está no arquivo **`index.html`**.
 O Supabase guarda apenas os dados (Postgres). **Não usa** Supabase Auth, Edge Functions nem Storage.
 
 ## 1. Banco (uma vez)
@@ -20,19 +20,25 @@ A URL e a chave **publishable** do projeto já estão no começo do script do `i
 - Perfis: administrador, membro (edita) e leitura. Todos os usuários ativos compartilham os mesmos dados (um espaço familiar).
 - Limites: a chave publishable fica visível no HTML (normal); quem a tem consegue chamar as funções, mas só com e-mail/senha válidos. Use senhas fortes e HTTPS.
 
-## 3. Usar
+## 3. Instalar como aplicativo (PWA)
+Arquivos do app: `index.html`, `manifest.webmanifest`, `sw.js` e a pasta `icons/` (mantenha todos juntos, na mesma pasta).
+1. Publique no GitHub Pages (item abaixo). A instalação exige **https**; abrindo o arquivo local não aparece a opção.
+2. Android (Chrome): abra o endereço do site e toque em **Instalar app** (botão no menu lateral/login) ou menu ⋮ › Instalar app. iPhone (Safari): Compartilhar › Adicionar à Tela de Início.
+3. O service worker guarda só a "casca" do app (tela e ícones) para abrir mais rápido/offline. **Dados financeiros nunca são guardados em cache.** Ao atualizar o site, aumente `CACHE = 'finance-ai-vN'` em `sw.js`.
+
+## 4. Publicar / usar
 - **GitHub Pages:** suba o repositório, *Settings › Pages › Source: GitHub Actions* e faça push na `main` (o workflow publica o `index.html`).
 - **Local:** dê duplo clique no `index.html` (funciona, exceto login Microsoft) ou rode `npx serve .` / `python3 -m http.server`.
 - Bibliotecas (leitor de PDF, planilha, login Microsoft) são carregadas da internet **só quando usadas**.
 
-## 4. IA (opcional)
+## 5. IA (opcional)
 Aba *Assistente IA*: informe sua chave Anthropic ou OpenAI. Ela fica **só neste navegador** (localStorage) e os dados vão direto ao provedor; use uma chave com limite de gasto. Sem chave, as dicas são calculadas localmente.
 
-## 5. OneDrive
-Registre um app no Microsoft Entra (tipo *Single-page application*), redirect URI = URL do site, permissões `User.Read` e `Files.Read`; cole o *client ID* na aba Importações. Só funciona em https/localhost e com a página aberta (sem sincronização em segundo plano).
+## 6. OneDrive
+Registre um app no Microsoft Entra (tipo *Single-page application*), redirect URI = URL exata do site (a aba Importações mostra), permissões `User.Read` e `Files.Read`. Cole na aba Importações o **ID do aplicativo (cliente)** — um código `00000000-0000-…`, **não o e-mail**. Em conta de empresa o TI pode exigir aprovação; alternativa: importação manual escolhendo os arquivos pelo app OneDrive. Só funciona em https/localhost e com a página aberta (sem sincronização em segundo plano).
 
-## 6. Importação
-CSV (UTF-8/ANSI; `,` `;` ou tab; cabeçalho pode vir após linhas de preâmbulo) e PDF com texto. Duplicidade por arquivo (SHA-256) e por lançamento. `PARC 03/10`, `Parcela 3 de 10` ou coluna "parcela" criam/atualizam parcelamentos. "Pagamento de fatura" vira transferência.
+## 7. Importação
+Botões **Modelo CSV** (planilha de exemplo para preencher) e **Meus lançamentos (.csv)** (backup reimportável). CSV (UTF-8/ANSI; `,` `;` ou tab; cabeçalho pode vir após linhas de preâmbulo) e PDF com texto. Duplicidade por arquivo (SHA-256) e por lançamento. `PARC 03/10`, `Parcela 3 de 10` ou coluna "parcela" criam/atualizam parcelamentos. "Pagamento de fatura" vira transferência.
 
 ## Testes
 `npm test` (funções de leitura/normalização; `app_pure.js` é o mesmo bloco embutido no `index.html`).

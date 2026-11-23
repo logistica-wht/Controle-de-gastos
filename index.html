@@ -2,11 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#07182b" />
 <meta name="color-scheme" content="light dark" />
 <meta name="description" content="FINANCE AI – controle financeiro familiar com importação de extratos e dicas inteligentes." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2312b886'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='40' font-weight='800' text-anchor='middle' fill='%23fff'%3EF%3C/text%3E%3C/svg%3E" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="FINANCE AI" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" />
@@ -160,6 +166,13 @@ body[data-role=viewer] .needs-edit{display:none!important}
 .member small{font-size:12px}
 .member .goal-actions{margin:0;flex-wrap:wrap}
 
+.help{background:var(--grad-soft);border-radius:14px;padding:12px 14px;margin:6px 0 10px;font-size:13px}
+.help summary{cursor:pointer;font-weight:700;color:var(--green-d)}
+.help ol{padding-left:20px;line-height:1.7;margin:10px 0}
+.help code{background:var(--surface-solid);border:1px solid var(--line);border-radius:8px;padding:2px 6px;word-break:break-all;font-size:12px}
+.install-btn{width:100%}
+@media(display-mode:standalone){body{padding-top:env(safe-area-inset-top)}}
+
 </style>
 </head>
 <body>
@@ -176,7 +189,7 @@ body[data-role=viewer] .needs-edit{display:none!important}
       <button class="nav" type="button" data-view="assistant">✧ <span>Assistente IA</span></button>
       <button class="nav admin-only" type="button" data-view="users">♧ <span>Usuários</span></button>
     </nav>
-    <div class="sidebar-bottom"><span id="user-label">Não conectado</span><div class="sb-actions"><button id="change-password" class="text-button" type="button">Alterar senha</button><button id="logout" class="text-button" type="button">Sair</button></div></div>
+    <div class="sidebar-bottom"><span id="user-label">Não conectado</span><button class="btn btn-light install-btn" type="button" hidden>⬇ Instalar app</button><div class="sb-actions"><button id="change-password" class="text-button" type="button">Alterar senha</button><button id="logout" class="text-button" type="button">Sair</button></div></div>
   </aside>
 
   <main class="main">
@@ -198,6 +211,7 @@ body[data-role=viewer] .needs-edit{display:none!important}
         <label>E-mail<input id="email" type="email" required autocomplete="username" placeholder="voce@email.com"></label>
         <label>Senha<input id="password" type="password" required minlength="8" maxlength="72" autocomplete="current-password" placeholder="Mínimo de 8 caracteres"></label>
         <div class="button-row"><button id="auth-submit" class="btn" type="submit">Entrar</button></div>
+        <button class="btn btn-light install-btn" type="button" hidden style="margin-top:12px">⬇ Instalar como aplicativo</button>
         <p class="hint" id="auth-hint">Primeiro acesso com senha inicial? Entre com ela: o sistema pedirá que você crie uma nova senha. Esqueceu a senha? Peça ao administrador para redefinir.</p>
         <p id="auth-message" class="muted" role="status"></p>
       </form>
@@ -239,10 +253,21 @@ body[data-role=viewer] .needs-edit{display:none!important}
           <article class="panel"><h3>Importação manual</h3><p class="muted">Selecione PDF (com texto) ou CSV do banco, cartão ou loja. Arquivos repetidos e lançamentos duplicados são ignorados.</p>
             <label class="upload-zone">＋<span>Escolher arquivos PDF ou CSV</span><input id="file-input" type="file" accept=".pdf,.csv,application/pdf,text/csv" multiple hidden></label>
             <div id="import-status" class="muted prewrap" role="status"></div>
-            <button id="process-files" class="btn needs-edit" type="button" disabled>Processar arquivos</button>
+            <div class="button-row"><button id="process-files" class="btn needs-edit" type="button" disabled>Processar arquivos</button><button id="download-template" class="btn btn-light" type="button">⬇ Modelo CSV</button><button id="download-backup" class="btn btn-light" type="button">⬇ Meus lançamentos (.csv)</button></div>
+            <p class="muted">Se o PDF não for lido, baixe o <b>Modelo CSV</b>, preencha (Excel/Planilhas) e importe. “Meus lançamentos” baixa os dados do período em CSV (backup).</p>
           </article>
-          <article class="panel"><h3>OneDrive</h3><p class="muted">Autorize sua conta Microsoft e escolha a pasta com os PDFs/CSVs. Funciona com a página aberta em endereço https (não por arquivo local).</p>
-            <label>Application (client) ID do Microsoft Entra<input id="ms-client-id" placeholder="ID do aplicativo Microsoft" autocomplete="off"></label>
+          <article class="panel"><h3>OneDrive</h3><p class="muted">Autorize sua conta Microsoft e escolha a pasta com os PDFs/CSVs. Funciona com o site aberto em endereço https.</p>
+            <label>ID do aplicativo (client ID) — não é o e-mail<input id="ms-client-id" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+            <details class="help"><summary>Como obter o ID do aplicativo</summary>
+              <ol>
+                <li>Acesse <b>entra.microsoft.com</b> › Identidade › Aplicativos › <b>Registros de aplicativo</b> › Novo registro.</li>
+                <li>Nome: FINANCE AI. Tipos de conta: “qualquer diretório organizacional e contas pessoais”.</li>
+                <li>URI de redirecionamento: tipo <b>Aplicativo de página única (SPA)</b> com este endereço: <code id="redirect-uri"></code></li>
+                <li>Copie o <b>ID do aplicativo (cliente)</b> e cole acima.</li>
+                <li>Em Permissões de API › Microsoft Graph › Delegadas: <b>User.Read</b> e <b>Files.Read</b>.</li>
+              </ol>
+              <p>Conta de empresa: o TI pode exigir aprovação do administrador ou bloquear o registro de aplicativos. Nesse caso, use a importação manual: toque em “Escolher arquivos” e selecione-os pelo app OneDrive do celular.</p>
+            </details>
             <label>Pasta do OneDrive<input id="onedrive-folder" placeholder="Ex.: /FINANCEIRO"></label>
             <button id="connect-onedrive" class="btn btn-light" type="button">Conectar OneDrive</button>
             <p id="onedrive-status" class="muted prewrap" role="status">Ainda não conectado.</p>
@@ -443,7 +468,9 @@ function normalizeRecord(r, fallbackYear) {
   else if (/credito|entrada|receita|^c$/.test(typeCol) || INCOME_RE.test(d)) kind = 'income';
   const inst = detectInstallment(description, pick(r, ['parcela', 'parcelas']));
   const finalDescription = inst ? inst.cleanDescription || description : description;
-  const category = kind === 'income' ? 'Renda' : categorize(finalDescription);
+  if (/transferencia/.test(typeCol)) kind = 'transfer';
+  const given = String(pick(r, ['categoria']) || '').trim();
+  const category = CATEGORIES.find((c) => strip(c) === strip(given)) || (kind === 'income' ? 'Renda' : categorize(finalDescription));
   return { description: finalDescription.slice(0, 200), amount: Math.round(parsed.value * 100) / 100, transaction_date: date, kind, category, installment: inst ? { current: inst.current, total: inst.total } : null };
 }
 
@@ -540,10 +567,11 @@ function localTips(rows, allRows, inst, goals, month) {
 const SUPABASE_URL = 'https://mcvcnllpriazdhwjyigi.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Tt_RUvFneQdbFDyGaA_aKg_0HBP-CC1';
 const CDN = {
-  pdf: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-  pdfWorker: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
-  excel: 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js',
-  msal: 'https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js'
+  pdf: ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'],
+  pdfWorker: ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'],
+  excel: ['https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js', 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js'],
+  // O CDN oficial da Microsoft (alcdn.msauth.net) foi descontinuado: usa-se jsDelivr/unpkg, com o oficial como último recurso.
+  msal: ['https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js', 'https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js', 'https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js']
 };
 
 const $ = (id) => document.getElementById(id);
@@ -639,7 +667,7 @@ async function enterApp() {
   $('user-label').textContent = `${S.user.name} · ${{ admin: 'administrador', member: 'membro', viewer: 'leitura' }[S.user.role]}`;
   document.body.dataset.role = S.user.role;
   if (S.user.must_change) { openPasswordDialog(true); return; }
-  showView('dashboard');
+  showView(S.goImports ? 'imports' : 'dashboard'); S.goImports = false;
   await loadAll();
   if (S.user.role === 'admin') loadUsers().catch(() => {});
 }
@@ -804,13 +832,23 @@ async function onGoalClick(e) {
 
 /* ============ BIBLIOTECAS SOB DEMANDA ============ */
 const loaded = {};
-function loadScript(url) {
-  if (!loaded[url]) loaded[url] = new Promise((ok, fail) => {
-    const s = document.createElement('script'); s.src = url; s.async = true;
-    s.onload = ok; s.onerror = () => { delete loaded[url]; fail(new Error('Não foi possível carregar uma biblioteca da internet (' + url.split('/')[2] + ').')); };
-    document.head.append(s);
-  });
-  return loaded[url];
+function loadScript(src) {
+  const list = Array.isArray(src) ? src : [src], key = list[0];
+  if (!loaded[key]) loaded[key] = (async () => {
+    for (const url of list) {
+      try {
+        await new Promise((ok, fail) => { const s = document.createElement('script'); s.src = url; s.async = true; s.onload = ok; s.onerror = () => { s.remove(); fail(new Error(url)); }; document.head.append(s); });
+        return;
+      } catch { /* tenta a próxima alternativa */ }
+    }
+    delete loaded[key];
+    throw new Error('Não foi possível carregar uma biblioteca da internet (' + list.map((u) => u.split('/')[2]).join(', ') + '). Verifique a conexão, bloqueadores de conteúdo ou a rede da empresa e tente de novo.');
+  })();
+  return loaded[key];
+}
+async function fetchTextFirst(urls) {
+  for (const u of urls) { try { const r = await fetch(u); if (r.ok) return await r.text(); } catch { /* próxima */ } }
+  throw new Error('Não foi possível baixar um componente da internet. Verifique a conexão e tente de novo.');
 }
 
 /* ============ LEITURA DE ARQUIVOS ============ */
@@ -823,13 +861,20 @@ async function readText(file) {
   try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch { return new TextDecoder('windows-1252').decode(buf); }
 }
 async function parsePDF(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (!bytes.length) throw new Error('O arquivo está vazio (0 bytes). Baixe-o novamente.');
+  if (!new TextDecoder('windows-1252').decode(bytes.subarray(0, 1024)).includes('%PDF-')) throw new Error('Este arquivo não é um PDF válido (pode ser uma imagem renomeada ou um download incompleto). Reenvie o original ou use o CSV do banco.');
   await loadScript(CDN.pdf);
   if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
     // O worker precisa ser do mesmo domínio: baixa o script e cria um Blob local.
-    const code = await (await fetch(CDN.pdfWorker)).text();
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([await fetchTextFirst(CDN.pdfWorker)], { type: 'text/javascript' }));
   }
-  const pdf = await window.pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  let pdf;
+  try { pdf = await window.pdfjsLib.getDocument({ data: bytes }).promise; }
+  catch (e) {
+    if (e && e.name === 'PasswordException') throw new Error('PDF protegido por senha. Remova a senha e tente de novo.');
+    throw new Error('Não foi possível abrir o PDF (arquivo corrompido ou gerado de forma incomum). Baixe-o de novo, abra e salve como PDF, ou use o CSV do banco. Baixe o “Modelo CSV” nesta tela se precisar digitar os dados.');
+  }
   const pages = [];
   for (let p = 1; p <= pdf.numPages; p++) {
     const content = await (await pdf.getPage(p)).getTextContent();
@@ -843,9 +888,9 @@ async function parsePDF(file) {
     pages.push([...rows.entries()].sort((a, b) => b[0] - a[0]).map(([, items]) => items.sort((a, b) => a.transform[4] - b.transform[4]).map((i) => i.str.trim()).join(' ')).join('\n'));
   }
   const text = pages.join('\n');
-  if (text.trim().length < 20) throw new Error('PDF sem texto (provavelmente digitalizado). Use o CSV do banco.');
+  if (text.trim().length < 20) throw new Error('PDF sem texto (provavelmente digitalizado/foto). Use o CSV do banco ou o Modelo CSV.');
   const { found, fallbackYear } = extractFromText(text);
-  if (!found.length) throw new Error('Não foi possível extrair lançamentos deste PDF (layout não reconhecido). Prefira o CSV do banco.');
+  if (!found.length) throw new Error('Não foi possível extrair lançamentos deste PDF (layout não reconhecido). Prefira o CSV do banco ou o Modelo CSV.');
   return { rows: found, fallbackYear };
 }
 async function readFile(file) {
@@ -923,30 +968,72 @@ async function loadImportHistory() {
 
 /* ============ ONEDRIVE (Microsoft Graph, MSAL) ============ */
 const GRAPH = 'https://graph.microsoft.com/v1.0', SCOPES = ['User.Read', 'Files.Read'];
+const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 let msalApp = null, msalAccount = null;
-async function msToken() {
-  try { return (await msalApp.acquireTokenSilent({ scopes: SCOPES, account: msalAccount })).accessToken; }
-  catch { return (await msalApp.acquireTokenPopup({ scopes: SCOPES, account: msalAccount })).accessToken; }
+async function getMsal(id) {
+  if (msalApp && msalApp.__cid === id) return msalApp;
+  await loadScript(CDN.msal);
+  msalApp = new window.msal.PublicClientApplication({ auth: { clientId: id, authority: 'https://login.microsoftonline.com/common', redirectUri: location.origin + location.pathname }, cache: { cacheLocation: 'localStorage' } });
+  msalApp.__cid = id;
+  if (msalApp.initialize) await msalApp.initialize();
+  return msalApp;
 }
-async function graph(url) {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${await msToken()}` } });
-  if (!res.ok) { const b = await res.json().catch(() => null); throw new Error(b?.error?.message || `Microsoft Graph respondeu ${res.status}`); }
-  return res.json();
+function setMsAccount(a) {
+  msalAccount = a;
+  $('onedrive-status').textContent = `Conectado como ${a.username}. Informe a pasta e importe.`; $('sync-onedrive').disabled = false;
+}
+const msError = (e) => {
+  const t = `${e.errorCode || ''} ${e.errorMessage || e.message || ''}`;
+  if (/AADSTS65001|AADSTS90094|AADSTS700016|consent_required|interaction_required/i.test(t) && /AADSTS65001|AADSTS90094|consent/i.test(t)) return 'Sua organização exige aprovação do administrador de TI para este aplicativo (consentimento). Peça ao TI para aprovar, ou use a importação manual escolhendo os arquivos do OneDrive.';
+  if (/AADSTS700016|unauthorized_client/i.test(t)) return 'ID do aplicativo não encontrado no Microsoft Entra. Confira se copiou o “ID do aplicativo (cliente)”.';
+  if (/AADSTS50011|redirect_uri/i.test(t)) return `O endereço de redirecionamento não está cadastrado no aplicativo. Cadastre (tipo SPA): ${location.origin + location.pathname}`;
+  return t.trim();
+};
+async function restoreOneDrive() {
+  const id = localStorage.getItem('fa_ms_client_id');
+  if (!id || !GUID.test(id) || location.protocol === 'file:') return;
+  if (localStorage.getItem('fa_ms_redirect') !== '1' && !localStorage.getItem('fa_ms_connected')) return;
+  try {
+    await getMsal(id);
+    const r = await msalApp.handleRedirectPromise();
+    const redirected = localStorage.getItem('fa_ms_redirect') === '1';
+    localStorage.removeItem('fa_ms_redirect');
+    const acc = r?.account || msalApp.getAllAccounts()[0];
+    if (acc) { setMsAccount(acc); if (redirected) S.goImports = true; }
+  } catch (e) { $('onedrive-status').textContent = 'Falha ao restaurar conexão: ' + msError(e); }
 }
 async function connectOneDrive() {
   const id = $('ms-client-id').value.trim();
-  if (!id) throw new Error('Informe o Application (client) ID do aplicativo Microsoft.');
-  if (location.protocol === 'file:') throw new Error('O login Microsoft não funciona abrindo o arquivo local. Publique a página (GitHub Pages) ou rode um servidor local (http://localhost).');
+  if (!id) throw new Error('Informe o ID do aplicativo (client ID) do Microsoft Entra.');
+  if (id.includes('@')) throw new Error('Isso é um e-mail. Informe o “ID do aplicativo (cliente)” do Microsoft Entra, no formato 00000000-0000-0000-0000-000000000000 (veja “Como obter o ID”).');
+  if (!GUID.test(id)) throw new Error('ID inválido. Ele deve ter o formato 00000000-0000-0000-0000-000000000000.');
+  if (location.protocol === 'file:') throw new Error('O login Microsoft não funciona abrindo o arquivo local. Publique o site (GitHub Pages) e abra pelo endereço https.');
   localStorage.setItem('fa_ms_client_id', id);
   $('onedrive-status').textContent = 'Abrindo login da Microsoft…';
-  await loadScript(CDN.msal);
-  msalApp = new window.msal.PublicClientApplication({ auth: { clientId: id, authority: 'https://login.microsoftonline.com/common', redirectUri: location.origin + location.pathname }, cache: { cacheLocation: 'sessionStorage' } });
-  if (msalApp.initialize) await msalApp.initialize();
+  await getMsal(id);
   try {
     const res = await msalApp.loginPopup({ scopes: SCOPES });
-    msalAccount = res.account;
-    $('onedrive-status').textContent = `Conectado como ${msalAccount.username}. Informe a pasta e importe.`; $('sync-onedrive').disabled = false;
-  } catch (e) { $('onedrive-status').textContent = 'Falha na conexão: ' + e.message; }
+    localStorage.setItem('fa_ms_connected', '1'); setMsAccount(res.account);
+  } catch (e) {
+    if (/popup|window_open|empty_window/i.test(`${e.errorCode} ${e.message}`)) {
+      // Popup bloqueado (comum em celular/app instalado): usa login por redirecionamento.
+      localStorage.setItem('fa_ms_redirect', '1'); localStorage.setItem('fa_ms_connected', '1');
+      await msalApp.loginRedirect({ scopes: SCOPES }); return;
+    }
+    $('onedrive-status').textContent = 'Falha na conexão: ' + msError(e);
+  }
+}
+async function msToken() {
+  try { return (await msalApp.acquireTokenSilent({ scopes: SCOPES, account: msalAccount })).accessToken; }
+  catch {
+    try { return (await msalApp.acquireTokenPopup({ scopes: SCOPES, account: msalAccount })).accessToken; }
+    catch (e) { localStorage.setItem('fa_ms_redirect', '1'); await msalApp.acquireTokenRedirect({ scopes: SCOPES, account: msalAccount }); throw new Error('Redirecionando para renovar o acesso…'); }
+  }
+}
+async function graph(url) {
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${await msToken()}` } });
+  if (!res.ok) { const b = await res.json().catch(() => null); throw new Error(res.status === 404 ? 'Pasta não encontrada no OneDrive. Confira o caminho (ex.: /FINANCEIRO).' : (b?.error?.message || `Microsoft Graph respondeu ${res.status}`)); }
+  return res.json();
 }
 async function syncOneDrive() {
   const path = $('onedrive-folder').value.trim();
@@ -1005,6 +1092,44 @@ async function doExport() {
   a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
   a.download = `finance-ai-${periodLabel()}.xlsx`; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ============ ARQUIVOS PARA BAIXAR (modelo e backup) ============ */
+function downloadBlob(name, text, type = 'text/csv;charset=utf-8') {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+function downloadTemplate() {
+  const csv = '\uFEFFData;Descrição;Valor;Tipo;Categoria;Parcela\r\n' +
+    '05/11/2026;Supermercado Exemplo;152,40;Despesa;Alimentação;\r\n' +
+    '06/11/2026;Loja Exemplo;199,90;Despesa;Compras;2/5\r\n' +
+    '10/11/2026;Salário;5000,00;Receita;Renda;\r\n';
+  downloadBlob('modelo-importacao-finance-ai.csv', csv);
+}
+function downloadBackup() {
+  const rows = periodRows();
+  if (!rows.length) throw new Error('Não há lançamentos no período para baixar.');
+  const kind = { income: 'Receita', expense: 'Despesa', transfer: 'Transferência' };
+  const cell = (s) => `"${String(s).replace(/"/g, '""')}"`;
+  const lines = rows.map((x) => [fmtDate(x.transaction_date), cell(x.description), String(Number(x.amount).toFixed(2)).replace('.', ','), kind[x.kind] || x.kind, cell(x.category || 'Outros'), ''].join(';'));
+  downloadBlob(`lancamentos-${periodLabel()}.csv`, '\uFEFFData;Descrição;Valor;Tipo;Categoria;Parcela\r\n' + lines.join('\r\n') + '\r\n');
+}
+
+/* ============ INSTALAÇÃO COMO APLICATIVO (PWA) ============ */
+let deferredInstall = null;
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+function setupPwa() {
+  const btns = [...document.querySelectorAll('.install-btn')];
+  const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; btns.forEach((b) => (b.hidden = false)); });
+  window.addEventListener('appinstalled', () => { deferredInstall = null; btns.forEach((b) => (b.hidden = true)); toast('Aplicativo instalado.'); });
+  if (iOS && !isStandalone()) btns.forEach((b) => (b.hidden = false));
+  btns.forEach((b) => b.addEventListener('click', async () => {
+    if (deferredInstall) { deferredInstall.prompt(); await deferredInstall.userChoice.catch(() => {}); deferredInstall = null; btns.forEach((x) => (x.hidden = true)); }
+    else alert('No iPhone/iPad: toque em Compartilhar e depois em “Adicionar à Tela de Início”.\nNo Android (Chrome): menu ⋮ › Instalar app.');
+  }));
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
 /* ============ DICAS E ASSISTENTE ============ */
@@ -1083,15 +1208,18 @@ function bind() {
   $('user-form').addEventListener('submit', guard(createUser)); $('users-list').addEventListener('click', guard(onUsersClick));
   $('gen-pass').addEventListener('click', () => { $('user-pass').value = genPassword(12); });
   $('connect-onedrive').addEventListener('click', guard(connectOneDrive)); $('sync-onedrive').addEventListener('click', guard(syncOneDrive));
+  $('download-template').addEventListener('click', downloadTemplate); $('download-backup').addEventListener('click', guard(downloadBackup));
   $('export-xlsx').addEventListener('click', guard(doExport)); $('export-xlsx-2').addEventListener('click', guard(doExport));
 }
 
 async function init() {
-  bind();
+  bind(); setupPwa();
+  $('redirect-uri').textContent = location.origin + location.pathname;
   $('tx-category').innerHTML = CATEGORIES.map((c) => `<option>${esc(c)}</option>`).join('');
   $('tx-date').value = today(); $('income-date').value = today(); $('month-filter').value = monthKey();
   $('ms-client-id').value = localStorage.getItem('fa_ms_client_id') || ''; $('onedrive-folder').value = localStorage.getItem('fa_onedrive_folder') || '';
   const cfg = aiCfg(); $('ai-provider').value = cfg.provider; $('ai-model').value = cfg.model;
+  await restoreOneDrive();
   try {
     S.token = localStorage.getItem('fa_token');
     if (S.token) {

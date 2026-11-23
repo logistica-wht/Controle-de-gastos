@@ -113,7 +113,9 @@ function normalizeRecord(r, fallbackYear) {
   else if (/credito|entrada|receita|^c$/.test(typeCol) || INCOME_RE.test(d)) kind = 'income';
   const inst = detectInstallment(description, pick(r, ['parcela', 'parcelas']));
   const finalDescription = inst ? inst.cleanDescription || description : description;
-  const category = kind === 'income' ? 'Renda' : categorize(finalDescription);
+  if (/transferencia/.test(typeCol)) kind = 'transfer';
+  const given = String(pick(r, ['categoria']) || '').trim();
+  const category = CATEGORIES.find((c) => strip(c) === strip(given)) || (kind === 'income' ? 'Renda' : categorize(finalDescription));
   return { description: finalDescription.slice(0, 200), amount: Math.round(parsed.value * 100) / 100, transaction_date: date, kind, category, installment: inst ? { current: inst.current, total: inst.total } : null };
 }
 
