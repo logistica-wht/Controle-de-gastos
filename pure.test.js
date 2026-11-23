@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const src = readFileSync(new URL('../app_pure.js', import.meta.url), 'utf8').split('/*PURE:START*/')[1].split('/*PURE:END*/')[0];
-const L = new Function(`${src}; return { parseAmount, normalizeDate, detectInstallment, normalizeRecord, buildExternalIds, parseCSVText, extractFromText, categorize, addMonths, genPassword, localTips };`)();
+const L = new Function(`${src}; return { parseAmount, normalizeDate, detectInstallment, normalizeRecord, buildExternalIds, parseCSVText, extractFromText, categorize, addMonths, genPassword, localTips, markSelfTransfers };`)();
 
 test('parseAmount', () => {
   assert.equal(L.parseAmount('1.234,56').value, 1234.56);
@@ -68,4 +68,27 @@ test('modelo CSV e backup são reimportáveis', () => {
   assert.deepEqual(rows[1].installment, { current: 2, total: 5 });
   assert.equal(rows[2].kind, 'income');
   assert.equal(rows[3].kind, 'transfer'); assert.equal(rows[3].description, 'Pix, família');
+});
+
+test('valores com sinal e colunas Crédito/Débito em CSV', () => {
+  const a = L.normalizeRecord({ Data: '01/11/2026', Descrição: 'Compra X', Valor: '-50,00' }, undefined, true);
+  const b = L.normalizeRecord({ Data: '02/11/2026', Descrição: 'Depósito', Valor: '100,00' }, undefined, true);
+  assert.equal(a.kind, 'expense'); assert.equal(b.kind, 'income');
+  const c = L.normalizeRecord({ Data: '03/11/2026', Histórico: 'Pix X', 'Crédito (R$)': '', 'Débito (R$)': '12,00', 'Saldo (R$)': '90,00' });
+  assert.equal(c.kind, 'expense'); assert.equal(c.amount, 12);
+  assert.equal(L.parseAmount('1.234,56D').negative, true);
+});
+
+test('titular inferido: Pix para si mesmo vira transferência', () => {
+  const recs = [
+    { description: 'TRANSF.POUP PARA C/C RAFAEL DOS SANTOS', kind: 'income' },
+    { description: 'PIX ENVIADO DES: RAFAEL DOS SANTOS 05/11', kind: 'expense' },
+    { description: 'PIX ENVIADO DES: Keila Regina Goncalve 02/11', kind: 'expense' }
+  ];
+  L.markSelfTransfers(recs);
+  assert.equal(recs[1].kind, 'transfer'); assert.equal(recs[2].kind, 'expense');
+  const r2 = [{ description: 'PIX RECEBIDO REM: Maria Souza Lima', kind: 'income' }];
+  L.markSelfTransfers(r2, ['Maria Souza Lima']); assert.equal(r2[0].kind, 'transfer');
+  const r3 = [{ description: 'PIX ENVIADO DES: Rafael Pereira', kind: 'expense' }];
+  L.markSelfTransfers(r3, ['Rafael']); assert.equal(r3[0].kind, 'expense'); // nome de uma palavra não é usado
 });
