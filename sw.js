@@ -1,6 +1,6 @@
 /* Service worker do FINANCE AI: permite instalar o site como app e abrir a tela mesmo sem internet.
    Dados financeiros NUNCA são guardados em cache: chamadas ao Supabase e a APIs externas passam direto pela rede. */
-const CACHE = 'finance-ai-v3';
+const CACHE = 'finance-ai-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
